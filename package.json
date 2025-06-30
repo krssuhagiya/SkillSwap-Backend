@@ -1,0 +1,12 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "A modern web platform where users can offer and learn skills from each other. Instead of money, users trade skills or earn time credits",
+  "license": "ISC",
+  "author": "KRS",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
