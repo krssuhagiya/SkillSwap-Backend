@@ -142,6 +142,9 @@ exports.updateProfile = async (req, res) => {
         try {
             const { userId } = req.params;
             const updateData = req.body;
+            console.log(userId);
+            console.log(updateData);
+            
 
             if (!mongoose.Types.ObjectId.isValid(userId)) {
                 return res.status(400).json({
@@ -162,7 +165,7 @@ exports.updateProfile = async (req, res) => {
             if (!updatedProfile) {
                 return res.status(404).json({
                     success: false,
-                    message: "Profile not found"
+                    message: "Profile not found backend"
                 });
             }
 
