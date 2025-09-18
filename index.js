@@ -10,6 +10,7 @@ const morgan = require("morgan");
 const authRoute = require("./routes/auth.route");
 const usetProfileRoutes = require("./routes/userProfile.route");
 const swapRequestRoutes = require("./routes/swapRequest.route");
+const chatRoutes = require("./routes/chat.route");
 
 // middleware
 app.use(express.json());
@@ -27,6 +28,7 @@ app.use(morgan("dev"));
 app.use("/api/auth",authRoute); 
 app.use("/api/profile",usetProfileRoutes);
 app.use("/api/swap-requests",swapRequestRoutes);
+app.use("/api/chats",chatRoutes);
 
 app.listen(process.env.PORT , () => {
   console.log("server is running on 3000");

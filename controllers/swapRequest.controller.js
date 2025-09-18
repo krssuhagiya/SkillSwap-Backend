@@ -1,5 +1,6 @@
 const SwapRequestSchemaModel = require("../models/SwapRequest.model");
 const UserProfileModel = require("../models/UserProfile.model");
+const ChatModel = require("../models/Chat.model");
 
 // POST /api/swap-requests
 exports.sendRequest = async (req, res) => {
@@ -87,10 +88,23 @@ exports.respondToSwapRequest = async (req, res) => {
 
         await swapRequest.save();
 
-        // If accepted, you might want to create a "swap session" or update user credits
+        // If accepted, create a chat for the participants
         if (action === 'accept') {
-            // Add your logic for handling accepted swaps here
-            // For example: create a chat room, schedule a meeting, etc.
+            try {
+                // Check if chat already exists
+                const existingChat = await ChatModel.findOne({ swapRequest: requestId });
+                if (!existingChat) {
+                    // Create new chat
+                    const chat = new ChatModel({
+                        swapRequest: requestId,
+                        participants: [swapRequest.requester, swapRequest.recipient]
+                    });
+                    await chat.save();
+                }
+            } catch (chatError) {
+                console.error('Error creating chat:', chatError);
+                // Don't fail the request acceptance if chat creation fails
+            }
         }
 
         res.json({
