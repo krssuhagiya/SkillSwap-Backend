@@ -66,7 +66,7 @@ exports.login = async (req, res) => {
       })
       .json({ message: "Login successful", token });
   } catch (error) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: error.message });
   }
 };
 // logout user
@@ -74,7 +74,7 @@ exports.logout = (req, res) => {
   try {
     res.clearCookie("token").json({ message: "Logged out successfully" });
   } catch (error) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: error.message });
   }
 };
 

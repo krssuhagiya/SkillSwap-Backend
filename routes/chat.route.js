@@ -27,4 +27,7 @@ router.patch("/:chatId/messages/:messageId/read", chatController.markMessageAsRe
 // Archive a chat
 router.patch("/:chatId/archive", chatController.archiveChat);
 
+// Delete a chat
+router.delete("/:chatId", chatController.deleteChat);
+
 module.exports = router;

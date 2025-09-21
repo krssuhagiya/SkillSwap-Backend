@@ -137,12 +137,47 @@ exports.sendMessage = async (req, res) => {
 
         await message.save();
 
+        // Debug logging
+        console.log('New message created:', {
+            id: message._id,
+            sender: message.sender,
+            content: message.content,
+            chat: message.chat
+        });
+
         // Update chat's last message timestamp
         chat.lastMessageAt = new Date();
         await chat.save();
 
         // Populate the message with sender details
         await message.populate('sender', 'username');
+
+        console.log('Message after populate:', {
+            id: message._id,
+            sender: message.sender,
+            content: message.content
+        });
+
+        // Emit real-time message to all participants in the chat
+        const io = req.app.get('io');
+        if (io) {
+            const messageData = {
+                _id: message._id,
+                chat: chatId,
+                sender: {
+                    _id: message.sender._id,
+                    username: message.sender.username
+                },
+                content: message.content,
+                type: message.type,
+                createdAt: message.createdAt,
+                isRead: message.isRead
+            };
+            
+            // Emit to all users in the chat room (including the sender)
+            io.to(`chat_${chatId}`).emit('message_received', messageData);
+            console.log(`Real-time message emitted to chat ${chatId}:`, messageData);
+        }
 
         res.status(201).json({
             message: "Message sent successfully",
@@ -177,6 +212,18 @@ exports.getChatMessages = async (req, res) => {
             .sort({ createdAt: -1 })
             .limit(limit * 1)
             .skip((page - 1) * limit);
+
+        // Debug logging
+        console.log('User ID from request:', userId);
+        console.log('Messages found:', messages.length);
+        messages.forEach((msg, index) => {
+            console.log(`Message ${index}:`, {
+                id: msg._id,
+                sender: msg.sender,
+                content: msg.content,
+                createdAt: msg.createdAt
+            });
+        });
 
         res.json({ 
             messages: messages.reverse(), // Reverse to get chronological order
@@ -251,6 +298,35 @@ exports.archiveChat = async (req, res) => {
         await chat.save();
 
         res.json({ message: "Chat archived successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+// DELETE /api/chats/:chatId - Delete a chat and all its messages
+exports.deleteChat = async (req, res) => {
+    try {
+        const { chatId } = req.params;
+        const userId = req.user.id;
+
+        // Check if user is part of this chat
+        const chat = await ChatModel.findOne({
+            _id: chatId,
+            participants: userId,
+            isActive: true
+        });
+
+        if (!chat) {
+            return res.status(404).json({ error: "Chat not found" });
+        }
+
+        // Delete all messages in this chat
+        await MessageModel.deleteMany({ chat: chatId });
+
+        // Delete the chat
+        await ChatModel.findByIdAndDelete(chatId);
+
+        res.json({ message: "Chat deleted successfully" });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

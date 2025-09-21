@@ -39,7 +39,7 @@ const swapRequestSchema = new mongoose.Schema(
         // When the status was last updated
         statusUpdatedAt: {
             type: Date,
-            default: Date.now,
+            default: () => new Date(),
         },
     },
     {

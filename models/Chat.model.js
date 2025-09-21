@@ -34,6 +34,14 @@ const chatSchema = new mongoose.Schema(
     }
 );
 
+// Validation to ensure exactly 2 participants
+chatSchema.pre('save', function(next) {
+    if (this.participants.length !== 2) {
+        return next(new Error('Chat must have exactly 2 participants'));
+    }
+    next();
+});
+
 // Index for efficient querying
 chatSchema.index({ participants: 1, isActive: 1 });
 chatSchema.index({ swapRequest: 1 });
